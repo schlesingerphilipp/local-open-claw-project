@@ -1,2 +1,6 @@
 workspace
 node_modules
+config/logs
+config/devices
+config/canvas
+config/agents
