@@ -35,7 +35,7 @@ Run OpenClaw in a Docker container with a local LLM served by LM Studio.
 3. Set **Context Length** to `32768` (or lower if VRAM limited)
 4. Click **Start Server**
 
-The server runs on `http://127.0.0.1:8000`
+The server runs on `http://127.0.0.1:1234`
 
 ### Step 3: Start OpenClaw
 
@@ -104,7 +104,7 @@ docker compose up -d
 
 1. Verify LM Studio server is running (check Local Server tab)
 2. Verify the model is loaded
-3. Test: `curl http://127.0.0.1:8000/v1/models`
+3. Test: `curl http://127.0.0.1:1234/v1/models`
 
 ### Port Already in Use
 
