@@ -1,0 +1,29 @@
+version: '3.3'
+
+services:
+  workspace:
+    build: .
+    tty: true
+    working_dir: /home/vscode/workspace
+    volumes:
+      - ~/.ssh/:/home/vscode/.ssh/
+      - ..:/home/vscode/workspace
+      - ../../mods:/mods
+      - ../../assets:/assets
+    network_mode: host
+    environment:
+      - DOCKER_HOST=tcp://localhost:2375 # Point your Docker client to the proxy
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    privileged: true # Required on some systems to read the socket
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Read-only access
+    environment:
+      # Enable only the features your app needs (0 = forbidden, 1 = allowed)
+      - CONTAINERS=1
+      - IMAGES=1
+      - NETWORKS=1
+      - POST=1 # Set to 1 if you need to START/STOP containers
+    network_mode: host
+    

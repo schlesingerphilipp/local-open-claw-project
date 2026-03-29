@@ -1,0 +1,22 @@
+// For format details, see https://aka.ms/devcontainer.json. 
+{
+    "name": "Philo Claw",
+    "dockerComposeFile": [
+        "docker-compose.workspace.yml"
+    ],
+    "service": "workspace",
+    "workspaceFolder": "/home/vscode/workspace",
+    "postCreateCommand": "bash .devcontainer/postCreateCommands.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "eamodio.gitlens",
+                "github.copilot",
+                "bierner.markdown-mermaid",
+                "njpwerner.autodocstring",
+                "ms-python.python",
+                "ms-toolsai.jupyter"
+            ]
+        }
+    }
+}
