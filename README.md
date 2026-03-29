@@ -46,7 +46,7 @@ docker compose up -d
 
 ### Step 4: Access OpenClaw
 
-- **Dashboard**: http://127.0.0.1:18789
+- **Dashboard**: http://127.0.0.1:8000
 - **CLI**: `docker compose run --rm openclaw-cli <command>`
 
 ## Configuration
@@ -55,7 +55,7 @@ docker compose up -d
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OPENCLAW_GATEWAY_PORT` | 18789 | Dashboard port |
+| `OPENCLAW_GATEWAY_PORT` | 8000 | Dashboard port |
 | `OPENCLAW_CONFIG_DIR` | ~/.openclaw | Config storage |
 | `OPENCLAW_WORKSPACE_DIR` | ~/.openclaw/workspace | Agent workspace |
 
