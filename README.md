@@ -1,6 +1,8 @@
 # OpenClaw + LM Studio Local Setup
+ALL CREDITS TO the OpenClaw Project. This is just a local setup I am using. It acts like a template for projects for me.
 
-Run OpenClaw in a Docker container with a local LLM served by LM Studio.
+## What it does
+Run OpenClaw in a Docker container with a local LLM served by LM Studio. OpenClaw can build and run containers. So it is not secure or anything. Just not screwing up the host machine immendiatly.
 
 ## Prerequisites
 
