@@ -1,6 +1,9 @@
 workspace
+workspace/**
 node_modules
 config/logs
 config/devices
 config/canvas
 config/agents
+config/update-check.json
+config/identity

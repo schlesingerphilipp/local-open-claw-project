@@ -12,6 +12,8 @@ services:
       - ../../assets:/assets
     network_mode: host
     environment:
+      - OPENCLAW_CONFIG_DIR=/Users/schlesi/git/open-claw-philo/config
+      - OPENCLAW_WORKSPACE_DIR=/Users/schlesi/git/open-claw-philo/workspace
       - DOCKER_HOST=tcp://localhost:2375 # Point your Docker client to the proxy
 
   docker-proxy:
@@ -25,5 +27,8 @@ services:
       - IMAGES=1
       - NETWORKS=1
       - POST=1 # Set to 1 if you need to START/STOP containers
+      - BUILD=1
+      - EXEC=1
+      - GRPC=1
     network_mode: host
     

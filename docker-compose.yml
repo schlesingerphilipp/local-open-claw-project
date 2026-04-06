@@ -1,44 +1,58 @@
 services:
   openclaw-gateway:
-    image: ghcr.io/openclaw/openclaw:latest
-    container_name: openclaw-gateway
+    image: ${OPENCLAW_IMAGE:-openclaw:ghcr.io/openclaw/openclaw:latest}
     environment:
       HOME: /home/node
       TERM: xterm-256color
       OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
       OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: ${OPENCLAW_ALLOW_INSECURE_PRIVATE_WS:-}
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
       TZ: ${OPENCLAW_TZ:-UTC}
+    volumes:
+      - $PWD/config:/home/node/.openclaw/
+      - $PWD/workspace:/home/node/.openclaw/workspace
+      ## Uncomment the lines below to enable sandbox isolation
+      ## (agents.defaults.sandbox). Requires Docker CLI in the image
+      ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use
+      ## scripts/docker/setup.sh with OPENCLAW_SANDBOX=1 for automated setup.
+      ## Set DOCKER_GID to the host's docker group GID (run: stat -c '%g' /var/run/docker.sock).
+      # - /var/run/docker.sock:/var/run/docker.sock
+    # group_add:
+    #   - "${DOCKER_GID:-999}"
     ports:
-      - "8000:18789"
-      - "8001:18790"
-    network_mode: host
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
     init: true
     restart: unless-stopped
     command:
-      - "node"
-      - "dist/index.js"
-      - "gateway"
-      - "--bind"
-      - "lan"
-      - "--port"
-      - "8000"
-    volumes:
-      - $HOST_PTH/config:/home/node/.openclaw
-      - $HOST_PTH/workspace:/home/node/.openclaw/workspace
+      [
+        "node",
+        "dist/index.js",
+        "gateway",
+        "--bind",
+        "${OPENCLAW_GATEWAY_BIND:-lan}",
+        "--port",
+        "18789",
+      ]
     healthcheck:
       test:
-        - "CMD"
-        - "node"
-        - "-e"
-        - "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 5s
       retries: 5
       start_period: 20s
 
   openclaw-cli:
-    image: ghcr.io/openclaw/openclaw:latest
-    network_mode: service:openclaw-gateway
+    build: .
+    user: "node" 
+    network_mode: "service:openclaw-gateway"
     cap_drop:
       - NET_RAW
       - NET_ADMIN
@@ -48,16 +62,36 @@ services:
       HOME: /home/node
       TERM: xterm-256color
       OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: ${OPENCLAW_ALLOW_INSECURE_PRIVATE_WS:-}
       BROWSER: echo
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
       TZ: ${OPENCLAW_TZ:-UTC}
+      DOCKER_HOST: tcp://docker-proxy:2375 # Point your Docker client to the proxy
+
     volumes:
-      - $HOST_PTH/config:/home/node/.openclaw
-      - $HOST_PTH/workspace:/home/node/.openclaw/workspace
+      - $PWD/config:/home/node/.openclaw/config
+      - $PWD/workspace:/home/node/.openclaw/workspace
     stdin_open: true
     tty: true
     init: true
-    entrypoint:
-      - "node"
-      - "dist/index.js"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["while true; do sleep 60; done"]
     depends_on:
       - openclaw-gateway
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    privileged: true # Required on some systems to read the socket
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Read-only access
+    environment:
+      # Enable only the features your app needs (0 = forbidden, 1 = allowed)
+      - CONTAINERS=1
+      - IMAGES=1
+      - NETWORKS=1
+      - POST=1 # Set to 1 if you need to START/STOP containers
+      - BUILD=1
+      - EXEC=1
+      - GRPC=1
